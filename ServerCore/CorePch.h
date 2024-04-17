@@ -4,6 +4,7 @@
 #include "CoreMacro.h"
 #include "CoreGlobal.h"
 #include "CoreTLS.h"
+#include "Lock.h"
 
 #include <vector>
 #include <list>
@@ -14,5 +15,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <Windows.h>
 #include <iostream>
 using namespace std;
