@@ -18,15 +18,13 @@
     <ClCompile Include="AccountManager.cpp">
       <Filter>Main</Filter>
     </ClCompile>
-    <ClCompile Include="UserManager.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
     <ClCompile Include="ConcurrentQueue.cpp">
       <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="ConcurrentStack.cpp">
       <Filter>Main</Filter>
     </ClCompile>
+    <ClCompile Include="PlayerManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -35,14 +33,12 @@
     <ClInclude Include="AccountManager.h">
       <Filter>Main</Filter>
     </ClInclude>
-    <ClInclude Include="UserManager.h">
-      <Filter>Main</Filter>
-    </ClInclude>
     <ClInclude Include="ConcurrentQueue.h">
       <Filter>Main</Filter>
     </ClInclude>
     <ClInclude Include="ConcurrentStack.h">
       <Filter>Main</Filter>
     </ClInclude>
+    <ClInclude Include="PlayerManager.h" />
   </ItemGroup>
 </Project>

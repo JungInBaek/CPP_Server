@@ -1,35 +1,13 @@
 #pragma once
 
-#include <mutex>
-
-
-class Account
-{
-	// TODO
-};
 
 class AccountManager
 {
+	USE_LOCK;
+
 public:
-	static AccountManager* Instance()
-	{
-		static AccountManager instance;
-		return &instance;
-	}
-
-	Account* GetAccount(int32 id)
-	{
-		lock_guard<mutex> guard(_mutex);
-		
-		// Account °Ë»ö
-
-		return nullptr;
-	}
-
-	void ProcessLogin();
-
-private:
-	mutex _mutex;
-	 //map<int32, Account*> _accounts;
+	void AccountThenPlayer();
+	void Lock();
 };
 
+extern AccountManager GAccountManager;
