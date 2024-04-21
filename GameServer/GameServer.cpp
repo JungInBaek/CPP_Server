@@ -3,7 +3,6 @@
 #include <atomic>
 #include <mutex>
 #include <Windows.h>
-#include "AccountManager.h"
 #include <future>
 #include "ConcurrentStack.h"
 #include "ConcurrentQueue.h"
@@ -13,31 +12,78 @@
 
 using namespace std;
 
-#include "PlayerManager.h"
-#include "AccountManager.h"
 
+// 소수 구하기
+// 1과 자기 자신으로만 나누어 떨어지는 1보다 큰 양의 정수
+
+
+bool isPrime(int number)
+{
+	if (number <= 1)
+	{
+		return false;
+	}
+	if (number == 2 || number == 3)
+	{
+		return true;
+	}
+
+	for (int i = 2; i < number; i++)
+	{
+		if (number % i == 0)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+int CountPrime(int start, int end, int coreCount)
+{
+	int count = 0;
+	for (int number = start; number <= end; number += coreCount)
+	{
+		if (isPrime(number))
+		{
+			count++;
+		}
+	}
+	return count;
+}
 
 int main()
 {
-	GThreadManager->Launch([=]()
-		{
-			while (true)
-			{
-				cout << "PlayerThenAccount" << endl;
-				GPlayerManager.PlayerThenAccount();
-				this_thread::sleep_for(100ms);
-			}
-		});
+	const int MAX_NUMBER = 100'0000;
 
-	GThreadManager->Launch([=]()
-		{
-			while (true)
-			{
-				cout << "AccountTHenPlayer" << endl;
-				GAccountManager.AccountThenPlayer();
-				this_thread::sleep_for(100ms);
-			}
-		});
+	vector<thread> threads;
 
-	GThreadManager->Join();
+	int coreCount = thread::hardware_concurrency();
+	int jobCount = (MAX_NUMBER / coreCount) + 1;
+
+	atomic<int32> count = 0;
+	for (int i = 0; i < coreCount; i++)
+	{
+		//int start = (i * jobCount) + 1;
+		int start = i + 1;
+		//int end = min((i + 1) * jobCount, MAX_NUMBER);
+
+		/*threads.push_back(thread([=, &count]()
+			{
+				count += CountPrime(start, end);
+			})
+		);*/
+		threads.push_back(thread([=, &count]()
+			{
+				count += CountPrime(start, MAX_NUMBER, coreCount);
+			})
+		);
+	}
+
+	for (thread& t : threads)
+	{
+		t.join();
+	}
+
+	cout << count << endl;
 }
