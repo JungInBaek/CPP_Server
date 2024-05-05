@@ -9,81 +9,81 @@
 #include "CoreGlobal.h"
 #include "ThreadManager.h"
 #include "CorePch.h"
+#include "RefCounting.h"
 
 using namespace std;
 
 
-// 소수 구하기
-// 1과 자기 자신으로만 나누어 떨어지는 1보다 큰 양의 정수
-
-
-bool isPrime(int number)
+class Wraight : public RefCountable
 {
-	if (number <= 1)
+public:
+	int _hp = 150;
+	int _posX = 0;
+	int _posY = 0;
+};
+
+using WraightRef = TSharedPtr<Wraight>;
+
+class Missile : public RefCountable
+{
+public:
+	void SetTarget(WraightRef target)
 	{
+		_target = target;
+	}
+
+	bool Update()
+	{
+		if (_target == nullptr)
+		{
+			return true;
+		}
+
+		int posX = _target->_posX;
+		int posY = _target->_posY;
+
+		// TODO: 쫒아간다
+
+		if (_target->_hp == 0)
+		{
+			_target = nullptr;
+			return true;
+		}
+
 		return false;
 	}
-	if (number == 2 || number == 3)
-	{
-		return true;
-	}
 
-	for (int i = 2; i < number; i++)
-	{
-		if (number % i == 0)
-		{
-			return false;
-		}
-	}
+	WraightRef _target = nullptr;
+};
 
-	return true;
-}
+using MissileRef = TSharedPtr<Missile>;
 
-int CountPrime(int start, int end, int coreCount)
-{
-	int count = 0;
-	for (int number = start; number <= end; number += coreCount)
-	{
-		if (isPrime(number))
-		{
-			count++;
-		}
-	}
-	return count;
-}
 
 int main()
 {
-	const int MAX_NUMBER = 100'0000;
+	WraightRef wraight(new Wraight());
+	wraight->ReleaseRef();
 
-	vector<thread> threads;
+	MissileRef missile(new Missile());
+	missile->ReleaseRef();
 
-	int coreCount = thread::hardware_concurrency();
-	int jobCount = (MAX_NUMBER / coreCount) + 1;
+	missile->SetTarget(wraight);
 
-	atomic<int32> count = 0;
-	for (int i = 0; i < coreCount; i++)
+	wraight->_hp = 0;
+	wraight = nullptr;
+
+	while (true)
 	{
-		//int start = (i * jobCount) + 1;
-		int start = i + 1;
-		//int end = min((i + 1) * jobCount, MAX_NUMBER);
-
-		/*threads.push_back(thread([=, &count]()
+		if (missile)
+		{
+			if (missile->Update())
 			{
-				count += CountPrime(start, end);
-			})
-		);*/
-		threads.push_back(thread([=, &count]()
-			{
-				count += CountPrime(start, MAX_NUMBER, coreCount);
-			})
-		);
+				missile = nullptr;
+			}
+		}
+		else
+		{
+			break;
+		}
 	}
-
-	for (thread& t : threads)
-	{
-		t.join();
-	}
-
-	cout << count << endl;
 }
