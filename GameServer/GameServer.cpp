@@ -15,7 +15,14 @@
 using namespace std;
 
 
-class Knight
+class Player
+{
+public:
+	Player() {}
+	virtual ~Player() {}
+};
+
+class Knight : public Player
 {
 public:
 	Knight()
@@ -40,7 +47,7 @@ public:
 
 int main()
 {
-	Knight* knight = xnew<Knight>(50);
-
+	Knight* knight = static_cast<Knight*>(xnew<Player>());
+	knight->_hp = 150;
 	xdelete(knight);
 }
