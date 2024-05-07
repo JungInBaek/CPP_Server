@@ -10,80 +10,37 @@
 #include "ThreadManager.h"
 #include "CorePch.h"
 #include "RefCounting.h"
+#include "Memory.h"
 
 using namespace std;
 
 
-class Wraight : public RefCountable
+class Knight
 {
 public:
-	int _hp = 150;
-	int _posX = 0;
-	int _posY = 0;
-};
+	Knight()
+	{
+		cout << "Knight()" << endl;
+	}
 
-using WraightRef = TSharedPtr<Wraight>;
+	Knight(int32 hp) : _hp(hp)
+	{
+		cout << "Knight(hp)" << endl;
+	}
 
-class Missile : public RefCountable
-{
+	~Knight()
+	{
+		cout << "~Knight()" << endl;
+	}
+
 public:
-	void SetTarget(WraightRef target)
-	{
-		_target = target;
-	}
-
-	bool Update()
-	{
-		if (_target == nullptr)
-		{
-			return true;
-		}
-
-		int posX = _target->_posX;
-		int posY = _target->_posY;
-
-		// TODO: 쫒아간다
-
-		if (_target->_hp == 0)
-		{
-			_target = nullptr;
-			return true;
-		}
-
-		return false;
-	}
-
-	WraightRef _target = nullptr;
+	int32 _hp = 100;
+	int32 _mp = 10;
 };
-
-using MissileRef = TSharedPtr<Missile>;
-
 
 int main()
 {
-	WraightRef wraight(new Wraight());
-	wraight->ReleaseRef();
+	Knight* knight = xnew<Knight>(50);
 
-	MissileRef missile(new Missile());
-	missile->ReleaseRef();
-
-	missile->SetTarget(wraight);
-
-	wraight->_hp = 0;
-	wraight = nullptr;
-
-	while (true)
-	{
-		if (missile)
-		{
-			if (missile->Update())
-			{
-				missile = nullptr;
-			}
-		}
-		else
-		{
-			break;
-		}
-	}
+	xdelete(knight);
 }

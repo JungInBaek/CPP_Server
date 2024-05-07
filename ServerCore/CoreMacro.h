@@ -2,6 +2,7 @@
 
 #define OUT
 
+
 /*----------------
 		Lock
 ----------------*/
@@ -12,6 +13,7 @@
 #define READ_LOCK				READ_LOCK_IDX(0);
 #define WRITE_LOCK_IDX(idx)		WriteLockGuard writeLockGuard_##idx(_locks[idx], typeid(this).name());
 #define WRITE_LOCK				WRITE_LOCK_IDX(0);
+
 
 /*----------------
 		Crash
@@ -32,3 +34,16 @@
 		__analysis_assume(expr);			\
 	}										\
 }
+
+
+/*----------------
+		Memory
+----------------*/
+
+#ifdef _DEBUG
+#define Xalloc(size) BaseAllocator::Alloc(size)
+#define Xrelease(ptr) BaseAllocator::Release(ptr)
+#else
+#define Xalloc(size) BaseAllocator::Alloc(size)
+#define Xrelease(ptr) BaseAllocator::Release(ptr)
+#endif

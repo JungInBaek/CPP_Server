@@ -141,9 +141,9 @@ private:
 	inline void Set(T* ptr)
 	{
 		_ptr = ptr;
-		if (_ptr)
+		if (ptr)
 		{
-			_ptr->AddRef();
+			ptr->AddRef();
 		}
 	}
 
