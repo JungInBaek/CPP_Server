@@ -4,13 +4,14 @@
 #include <mutex>
 #include <Windows.h>
 #include <future>
+#include "CorePch.h"
+#include "CoreGlobal.h"
 #include "ConcurrentStack.h"
 #include "ConcurrentQueue.h"
-#include "CoreGlobal.h"
 #include "ThreadManager.h"
-#include "CorePch.h"
 #include "RefCounting.h"
 #include "Memory.h"
+#include "Container.h"
 
 using namespace std;
 
@@ -47,7 +48,8 @@ public:
 
 int main()
 {
-	Knight* knight = static_cast<Knight*>(xnew<Player>());
-	knight->_hp = 150;
-	xdelete(knight);
+	Vector<Knight> v(100);
+
+	Map<int32, Knight> m;
+	m[100] = Knight();
 }

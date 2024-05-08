@@ -1,6 +1,7 @@
 #pragma once
 #include "Allocator.h"
 
+
 template<typename Type, typename... Args>
 Type* xnew(Args&&... args)
 {
