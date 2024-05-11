@@ -20,7 +20,7 @@ Memory::Memory()
 		}
 	}
 
-	for (size = 1172; size <= 2048; size += 128)
+	for (size = 1153; size <= 2048; size += 128)
 	{
 		MemoryPool* pool = new MemoryPool(size);
 		_pools.push_back(pool);
@@ -32,7 +32,7 @@ Memory::Memory()
 		}
 	}
 
-	for (size = 2176; size <= 4096; size += 256)
+	for (size = 2305; size <= 4096; size += 256)
 	{
 		MemoryPool* pool = new MemoryPool(size);
 		_pools.push_back(pool);

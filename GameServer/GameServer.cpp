@@ -53,12 +53,12 @@ int main()
 			{
 				while (true)
 				{
+					this_thread::sleep_for(5s);
+
 					Vector<Knight> v(100);
 
 					Map<int32, Knight> m;
 					m[100] = Knight();
-
-					this_thread::sleep_for(1s);
 				}
 			});
 	}
