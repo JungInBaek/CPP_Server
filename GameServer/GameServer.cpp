@@ -11,54 +11,30 @@
 #include "Memory.h"
 #include "Allocator.h"
 #include "Container.h"
+#include "MemoryPool.h"
 
 using namespace std;
 
 
-class Player
+class Knight
 {
 public:
-	Player() {}
-	virtual ~Player() {}
-};
-
-class Knight : public Player
-{
-public:
-	Knight()
-	{
-		cout << "Knight()" << endl;
-	}
-
-	Knight(int32 hp) : _hp(hp)
-	{
-		cout << "Knight(hp)" << endl;
-	}
-
-	~Knight()
-	{
-		cout << "~Knight()" << endl;
-	}
-
-public:
-	int32 _hp = 100;
-	int32 _mp = 10;
+	int32 _hp = rand() % 1000;
 };
 
 int main()
 {
-	for (int i = 0; i < 5; i++)
+	srand(static_cast<uint64>(time(nullptr)));
+	for (int i = 0; i < 2; i++)
 	{
 		GThreadManager->Launch([]()
 			{
 				while (true)
 				{
-					this_thread::sleep_for(5s);
-
-					Vector<Knight> v(100);
-
-					Map<int32, Knight> m;
-					m[100] = Knight();
+					Knight* knight = xnew<Knight>();
+					cout << knight->_hp << endl;
+					this_thread::sleep_for(1s);
+					xdelete(knight);
 				}
 			});
 	}
