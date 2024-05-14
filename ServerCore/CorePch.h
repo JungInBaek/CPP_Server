@@ -11,3 +11,4 @@ using namespace std;
 #include "Lock.h"
 #include "Container.h"
 #include "ObjectPool.h"
+#include "TypeCast.h"
