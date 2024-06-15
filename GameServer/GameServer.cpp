@@ -1,177 +1,141 @@
-﻿#include "pch.h"
-#include <thread>
+﻿#pragma once
+#include "pch.h"
+#include <iostream>
+#include "CorePch.h"
 #include <atomic>
 #include <mutex>
-#include <Windows.h>
+#include <windows.h>
 #include <future>
-#include "CorePch.h"
-#include "CoreGlobal.h"
 #include "ThreadManager.h"
-#include "RefCounting.h"
+
+#include <winsock2.h>
+#include <mswsock.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "ws2_32.lib")
+
 #include "Memory.h"
-#include "Allocator.h"
-#include "Container.h"
-#include "MemoryPool.h"
 
 
-using TL = TypeList<class Player, class Mage, class Knight, class Archer>;
+const int32 BUFSIZE = 1000;
 
-class Player
+struct Session
 {
-public:
-	DECLARE_TL;
-
-	Player()
-	{
-		INIT_TL(Player);
-	}
-
-	virtual ~Player() {}
-
+	SOCKET socket = INVALID_SOCKET;
+	char recvBuffer[BUFSIZE] = {};
+	int32 recvBytes = 0;
 };
 
-class Mage : public Player
+enum IO_TYPE
 {
-public:
-	Mage()
-	{
-		INIT_TL(Mage);
-	}
+	READ,
+	WRITE,
+	ACCEPT,
+	CONNECT,
 };
 
-class Knight : public Player
+struct OverlappedEx
 {
-public:
-	Knight()
-	{
-		INIT_TL(Knight);
-	}
+	WSAOVERLAPPED overlapped = {};
+	int32 type = 0;
 };
 
-class Archer : public Player
+void WorkerThreadMain(HANDLE iocpHandle)
 {
-public:
-	Archer()
+	while (true)
 	{
-		INIT_TL(Archer);
-	}
-};
+		DWORD bytesTransferred = 0;
+		Session* session = nullptr;
+		OverlappedEx* overlappedEx = nullptr;
 
-class Dog : public Player
-{
-public:
-	Dog()
-	{
-		INIT_TL(Dog);
+		BOOL ret = ::GetQueuedCompletionStatus(iocpHandle, &bytesTransferred, (PULONG_PTR)&session, (LPOVERLAPPED*)&overlappedEx, INFINITE);
+		if (ret == FALSE || bytesTransferred == 0)
+		{
+			continue;
+		}
+
+		ASSERT_CRASH(overlappedEx->type == READ);
+
+		cout << "Recv Data IOCP = " << bytesTransferred << endl;
+
+		WSABUF wsaBuf;
+		wsaBuf.buf = session->recvBuffer;
+		wsaBuf.len = BUFSIZE;
+
+		DWORD recvLen = 0;
+		DWORD flags = 0;
+		::WSARecv(session->socket, &wsaBuf, 1, &recvLen, &flags, &overlappedEx->overlapped, NULL);
 	}
-};
+}
 
 
 int main()
 {
+	WSAData wsaData;
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 	{
-		TypeList<Mage, Knight>::Head whoami1;
-		TypeList<Mage, Knight>::Tail whoami2;
-
-		TypeList<Mage, Knight, Archer>::Head whoami3;
-		TypeList<Mage, Knight, Archer>::Tail::Head whoami4;
-		TypeList<Mage, Knight, Archer>::Tail::Tail whoami5;
-
-		using TL = TypeList<Player, Mage, Knight, Archer>;
-
-		int32 len1 = Length<TL>::value;
-
-		TypeAt<TL, 0>::Result whoami6;
-		TypeAt<TL, 1>::Result whoami7;
-		TypeAt<TL, 2>::Result whoami8;
-
-		int32 index1 = IndexOf<TL, Mage>::value;
-		int32 index2 = IndexOf<TL, Knight>::value;
-		int32 index3 = IndexOf<TL, Archer>::value;
-		int32 index4 = IndexOf<TL, Player>::value;
-
-		bool convert1 = Conversion<Player, Knight>::exists;
-		bool convert2 = Conversion<Knight, Player>::exists;
-		bool convert3 = Conversion<Knight, Mage>::exists;
-		bool convert4 = Conversion<Mage, Knight>::exists;
-		bool convert5 = Conversion<Knight, Player>::exists;
-		bool convert6 = Conversion<Player, Knight>::exists;
+		return 0;
 	}
 
+	SOCKET listenSocket = ::socket(AF_INET, SOCK_STREAM, 0);
+	if (listenSocket == INVALID_SOCKET)
 	{
-		Player* player = new Player();
-
-		bool canCast = CanCast<Knight*>(player);
-		Knight* knight = TypeCast<Knight*>(player);
-
-		delete player;
+		return 0;
 	}
 
+	SOCKADDR_IN serverAddr;
+	::memset(&serverAddr, 0, sizeof(serverAddr));
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_addr.s_addr = ::htonl(INADDR_ANY);
+	serverAddr.sin_port = ::htons(7777);
+
+	if (::bind(listenSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
 	{
-		Player* player = new Knight();
-
-		bool canCast = CanCast<Knight*>(player);
-		Knight* knight = TypeCast<Knight*>(player);
-
-		delete player;
+		return 0;
 	}
 
+	if (::listen(listenSocket, SOMAXCONN) == SOCKET_ERROR)
 	{
-		Player* player = new Knight();
-
-		bool canCast = CanCast<Archer*>(player);
-		Archer* archer = TypeCast<Archer*>(player);
-
-		delete player;
+		return 0;
 	}
 
+	vector<Session*> sessionManager;
+
+	HANDLE iocpHandle = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+
+	GThreadManager->Launch([=]() { WorkerThreadMain(iocpHandle); });
+
+	while (true)
 	{
-		Player* player = new Knight();
+		SOCKADDR_IN clientAddr;
+		int32 addrLen = sizeof(clientAddr);
 
-		bool canCast = CanCast<Dog*>(player);
-		Dog* dog2 = TypeCast<Dog*>(player);
+		SOCKET clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
+		if (clientSocket == INVALID_SOCKET)
+		{
+			return 0;
+		}
 
-		delete player;
+		Session* session = new Session();
+		session->socket = clientSocket;
+		sessionManager.push_back(session);
+
+		cout << "Client Connected!" << endl;
+
+		::CreateIoCompletionPort((HANDLE)clientSocket, iocpHandle, (ULONG_PTR)session, 0);
+
+		WSABUF wsaBuf;
+		wsaBuf.buf = session->recvBuffer;
+		wsaBuf.len = BUFSIZE;
+
+		OverlappedEx* overlappedEx = new OverlappedEx();
+		overlappedEx->type = IO_TYPE::READ;
+
+		DWORD recvLen = 0;
+		DWORD flags = 0;
+		::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &overlappedEx->overlapped, NULL);
 	}
 
-	{
-		Player* dog = new Dog();
+	GThreadManager->Join();
 
-		bool canCast = CanCast<Dog*>(dog);
-		Dog* player = TypeCast<Dog*>(dog);
-
-		delete dog;
-	}
-
-	{
-		Dog* dog = new Dog();
-
-		bool canCast = CanCast<Player*>(dog);
-		Player* player = TypeCast<Player*>(dog);
-
-		delete dog;
-	}
-
-	{
-		Player* player = new Player();
-
-		bool canCast = CanCast<Dog*>(player);
-		Dog* dog = TypeCast<Dog*>(player);
-
-		delete player;
-	}
-
-	{
-		shared_ptr<Knight> knight = MakeShared<Knight>();
-
-		shared_ptr<Player> player = TypeCast<Player>(knight);
-		bool canCast = CanCast<Player>(knight);
-	}
-
-	{
-		shared_ptr<Player> player = MakeShared<Knight>();
-
-		shared_ptr<Archer> archer = TypeCast<Archer>(player);
-		bool canCast = CanCast<Mage>(player);
-	}
+	::WSACleanup();
 }
