@@ -7,13 +7,7 @@
 #include <windows.h>
 #include <future>
 #include "ThreadManager.h"
-
-#include <winsock2.h>
-#include <mswsock.h>
-#include <ws2tcpip.h>
-#pragma comment(lib, "ws2_32.lib")
-
-#include "Memory.h"
+#include "SocketUtils.h"
 
 
 const int32 BUFSIZE = 1000;
@@ -70,34 +64,10 @@ void WorkerThreadMain(HANDLE iocpHandle)
 
 int main()
 {
-	WSAData wsaData;
-	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-	{
-		return 0;
-	}
-
-	SOCKET listenSocket = ::socket(AF_INET, SOCK_STREAM, 0);
-	if (listenSocket == INVALID_SOCKET)
-	{
-		return 0;
-	}
-
-	SOCKADDR_IN serverAddr;
-	::memset(&serverAddr, 0, sizeof(serverAddr));
-	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_addr.s_addr = ::htonl(INADDR_ANY);
-	serverAddr.sin_port = ::htons(7777);
-
-	if (::bind(listenSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
-	{
-		return 0;
-	}
-
-	if (::listen(listenSocket, SOMAXCONN) == SOCKET_ERROR)
-	{
-		return 0;
-	}
-
+	SOCKET listenSocket = SocketUtils::CreateSocket();
+	SocketUtils::BindAnyAddress(listenSocket, 7777);
+	SocketUtils::Listen(listenSocket);
+	
 	vector<Session*> sessionManager;
 
 	HANDLE iocpHandle = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
@@ -115,7 +85,7 @@ int main()
 			return 0;
 		}
 
-		Session* session = new Session();
+		Session* session = xnew<Session>();
 		session->socket = clientSocket;
 		sessionManager.push_back(session);
 
@@ -133,6 +103,14 @@ int main()
 		DWORD recvLen = 0;
 		DWORD flags = 0;
 		::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &overlappedEx->overlapped, NULL);
+
+		//Session* s = sessionManager.back();
+		//sessionManager.pop_back();
+
+		//::closesocket(s->socket);
+		////::WSACloseEvent(wsaEvent);
+
+		//xdelete(s);
 	}
 
 	GThreadManager->Join();

@@ -1,4 +1,5 @@
-﻿#include "pch.h"
+﻿#pragma once
+#include "pch.h"
 
 #include <winsock2.h>
 #include <mswsock.h>

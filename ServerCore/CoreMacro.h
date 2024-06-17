@@ -36,4 +36,4 @@
 	}										\
 }
 
-//#define _STOMP
+#define _STOMP
