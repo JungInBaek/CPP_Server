@@ -4,9 +4,6 @@
     <Filter Include="Network">
       <UniqueIdentifier>{d11dec8c-31da-40f9-94f7-0682b0509bd2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Utils">
-      <UniqueIdentifier>{8b43cac9-1913-4d2b-8b6b-25da04e8e738}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Main">
       <UniqueIdentifier>{ce061c40-2691-4444-89ae-829d4b44eef3}</UniqueIdentifier>
     </Filter>
@@ -15,6 +12,9 @@
     </Filter>
     <Filter Include="Memory">
       <UniqueIdentifier>{b270fb36-9228-4296-b844-e3bbd3a21219}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{8b43cac9-1913-4d2b-8b6b-25da04e8e738}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -72,6 +72,18 @@
     <ClInclude Include="SocketUtils.h">
       <Filter>Network</Filter>
     </ClInclude>
+    <ClInclude Include="IocpCore.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="IocpEvent.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Listener.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CorePch.cpp">
@@ -111,6 +123,18 @@
       <Filter>Network</Filter>
     </ClCompile>
     <ClCompile Include="SocketUtils.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="IocpCore.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="IocpEvent.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Listener.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Session.cpp">
       <Filter>Network</Filter>
     </ClCompile>
   </ItemGroup>

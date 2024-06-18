@@ -8,6 +8,7 @@
 #include <future>
 #include "ThreadManager.h"
 #include "SocketUtils.h"
+#include "Listener.h"
 
 
 const int32 BUFSIZE = 1000;
@@ -64,54 +65,70 @@ void WorkerThreadMain(HANDLE iocpHandle)
 
 int main()
 {
-	SOCKET listenSocket = SocketUtils::CreateSocket();
-	SocketUtils::BindAnyAddress(listenSocket, 7777);
-	SocketUtils::Listen(listenSocket);
-	
-	vector<Session*> sessionManager;
+	Listener listener;
+	listener.StartAccept(NetAddress(L"127.0.0.1", 7777));
 
-	HANDLE iocpHandle = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-
-	GThreadManager->Launch([=]() { WorkerThreadMain(iocpHandle); });
-
-	while (true)
+	for (int i = 0; i < 5; i++)
 	{
-		SOCKADDR_IN clientAddr;
-		int32 addrLen = sizeof(clientAddr);
-
-		SOCKET clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
-		if (clientSocket == INVALID_SOCKET)
-		{
-			return 0;
-		}
-
-		Session* session = xnew<Session>();
-		session->socket = clientSocket;
-		sessionManager.push_back(session);
-
-		cout << "Client Connected!" << endl;
-
-		::CreateIoCompletionPort((HANDLE)clientSocket, iocpHandle, (ULONG_PTR)session, 0);
-
-		WSABUF wsaBuf;
-		wsaBuf.buf = session->recvBuffer;
-		wsaBuf.len = BUFSIZE;
-
-		OverlappedEx* overlappedEx = new OverlappedEx();
-		overlappedEx->type = IO_TYPE::READ;
-
-		DWORD recvLen = 0;
-		DWORD flags = 0;
-		::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &overlappedEx->overlapped, NULL);
-
-		//Session* s = sessionManager.back();
-		//sessionManager.pop_back();
-
-		//::closesocket(s->socket);
-		////::WSACloseEvent(wsaEvent);
-
-		//xdelete(s);
+		GThreadManager->Launch(
+			[=]()
+			{
+				while (true)
+				{
+					GIocpCore.Dispatch();
+				}
+			}
+		);
 	}
+
+	//SOCKET listenSocket = SocketUtils::CreateSocket();
+	//SocketUtils::BindAnyAddress(listenSocket, 7777);
+	//SocketUtils::Listen(listenSocket);
+	//
+	//vector<Session*> sessionManager;
+
+	//HANDLE iocpHandle = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+
+	//GThreadManager->Launch([=]() { WorkerThreadMain(iocpHandle); });
+
+	//while (true)
+	//{
+	//	SOCKADDR_IN clientAddr;
+	//	int32 addrLen = sizeof(clientAddr);
+
+	//	SOCKET clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
+	//	if (clientSocket == INVALID_SOCKET)
+	//	{
+	//		return 0;
+	//	}
+
+	//	Session* session = xnew<Session>();
+	//	session->socket = clientSocket;
+	//	sessionManager.push_back(session);
+	//	
+	//	cout << "Client Connected!" << endl;
+
+	//	::CreateIoCompletionPort((HANDLE)clientSocket, iocpHandle, (ULONG_PTR)session, 0);
+
+	//	WSABUF wsaBuf;
+	//	wsaBuf.buf = session->recvBuffer;
+	//	wsaBuf.len = BUFSIZE;
+
+	//	OverlappedEx* overlappedEx = new OverlappedEx();
+	//	overlappedEx->type = IO_TYPE::READ;
+
+	//	DWORD recvLen = 0;
+	//	DWORD flags = 0;
+	//	::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &overlappedEx->overlapped, NULL);
+
+	//	//Session* s = sessionManager.back();
+	//	//sessionManager.pop_back();
+
+	//	//::closesocket(s->socket);
+	//	////::WSACloseEvent(wsaEvent);
+
+	//	//xdelete(s);
+	//}
 
 	GThreadManager->Join();
 
