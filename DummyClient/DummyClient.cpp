@@ -6,6 +6,7 @@
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 
+
 int main()
 {
 	WSAData wsaData;
@@ -37,15 +38,18 @@ int main()
 	{
 		if (::connect(clientSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
 		{
+			// 아직 연결안된 상태
 			if (::WSAGetLastError() == WSAEWOULDBLOCK)
 			{
 				continue;
 			}
+			// 이미 연결된 상태
 			if (::WSAGetLastError() == WSAEISCONN)
 			{
 				break;
 			}
-			return 0;
+			// Error
+			break;
 		}
 	}
 

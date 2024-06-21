@@ -10,11 +10,11 @@ Listener::~Listener()
 {
 	SocketUtils::Close(_socket);
 
-	for (AcceptEvent* event : _acceptEvents)
+	for (AcceptEvent* acceptEvent : _acceptEvents)
 	{
 		// TODO
 
-		xdelete(event);
+		xdelete(acceptEvent);
 	}
 }
 
@@ -127,7 +127,7 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 
 	session->SetNetAddress(NetAddress(sockAddress));
 
-	cout << "Client Connected!" << endl;
+	session->ProcessConnect();
 
 	RegisterAccept(acceptEvent);
 }

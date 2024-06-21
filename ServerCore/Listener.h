@@ -4,6 +4,7 @@
 
 
 class AcceptEvent;
+class ServerService;
 
 class Listener : public IocpObject
 {
