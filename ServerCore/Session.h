@@ -2,6 +2,7 @@
 #include "IocpCore.h"
 #include "IocpEvent.h"
 #include "NetAddress.h"
+#include "RecvBuffer.h"
 
 
 class Service;
@@ -15,6 +16,11 @@ class Session : public IocpObject
 	friend class Listener;
 	friend class IocpCore;
 	friend class Service;
+
+	enum
+	{ 
+		BUFFER_SIZE = 0x10000, // 64KB 
+	};
 
 public:
 	Session();
@@ -31,30 +37,11 @@ public:
 
 public:
 	// 정보 관련
-	void SetNetAddress(NetAddress address)
-	{
-		_netAddress = address;
-	}
-
-	NetAddress GetNetAddress()
-	{
-		return _netAddress;
-	}
-
-	SOCKET GetSocket()
-	{
-		return _socket;
-	}
-
-	bool IsConnected()
-	{
-		return _connected;
-	}
-
-	SessionRef GetSessionRef()
-	{
-		return static_pointer_cast<Session>(shared_from_this());
-	}
+	void SetNetAddress(NetAddress address) { _netAddress = address;	}
+	NetAddress GetNetAddress() { return _netAddress; }
+	SOCKET GetSocket() { return _socket; }
+	bool IsConnected() { return _connected;	}
+	SessionRef GetSessionRef() { return static_pointer_cast<Session>(shared_from_this()); }
 
 private:
 	// 인터페이스
@@ -82,10 +69,6 @@ protected:
 	virtual void OnSend(int32 len) {}
 	virtual void OnDisconnected() {}
 
-public:
-	// TEMP
-	BYTE _recvBuffer[1000];
-
 private:
 	weak_ptr<Service> _service;
 	SOCKET _socket = INVALID_SOCKET;
@@ -96,6 +79,7 @@ private:
 	USE_LOCK;
 
 	// 수신 관련
+	RecvBuffer _recvBuffer;
 
 	// 송신 관련
 

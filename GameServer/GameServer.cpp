@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <iostream>
 #include "pch.h"
 #include "ThreadManager.h"
 #include "Service.h"
@@ -28,8 +27,6 @@ public:
 		cout << "OnSend Len = " << len << endl;
 	}
 };
-
-const int32 BUFSIZE = 1000;
 
 int main()
 {
