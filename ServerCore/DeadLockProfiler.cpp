@@ -26,9 +26,9 @@ void DeadLockProfiler::PushLock(const char* name)
 	}
 
 	// 이전에 잡은 락이 있는지 확인
-	if (_lockStack.empty()  == false)
+	if (LLockStack.empty()  == false)
 	{
-		const int32 prevId = _lockStack.top();
+		const int32 prevId = LLockStack.top();
 		// 서로 다른 락을 잡으려 한다면
 		if (lockId != prevId)
 		{
@@ -42,25 +42,25 @@ void DeadLockProfiler::PushLock(const char* name)
 			}
 		}
 	}
-	_lockStack.push(lockId);
+	LLockStack.push(lockId);
 }
 
 void DeadLockProfiler::PopLock(const char* name)
 {
 	LockGuard guard(_lock);
 
-	if (_lockStack.empty())
+	if (LLockStack.empty())
 	{
 		CRASH("MULTIPLE_UNLOCK");
 	}
 
 	int32 lockId = _nameToId[name];
-	if (lockId != _lockStack.top())
+	if (lockId != LLockStack.top())
 	{
 		CRASH("INVALID_UNLOCK");
 	}
 
-	_lockStack.pop();
+	LLockStack.pop();
 }
 
 void DeadLockProfiler::CheckCycle()
