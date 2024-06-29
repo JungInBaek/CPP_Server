@@ -3,6 +3,7 @@
 #include "ThreadManager.h"
 #include "Service.h"
 #include "GameSession.h"
+#include "GameSessionManager.h"
 
 
 int main()
@@ -22,6 +23,24 @@ int main()
 				}
 			}
 		);
+	}
+
+	char sendData[1000] = "Hello World";
+
+	while (true)
+	{
+		SendBufferRef sendBuffer = GSendBufferManager->Open(4096);
+
+		BYTE* buffer = sendBuffer->Buffer();
+		reinterpret_cast<PacketHeader*>(buffer)->size = sizeof(PacketHeader) + sizeof(sendData);
+		reinterpret_cast<PacketHeader*>(buffer)->id = 1;
+
+		::memcpy(&buffer[4], sendData, sizeof(sendData));
+		sendBuffer->Close(sizeof(PacketHeader) + sizeof(sendData));
+
+		GSessionManager.Broadcast(sendBuffer);
+
+		this_thread::sleep_for(250ms);
 	}
 
 	GThreadManager->Join();

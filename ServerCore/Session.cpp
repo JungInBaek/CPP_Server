@@ -4,6 +4,10 @@
 #include "Service.h"
 
 
+/*--------------------
+		Session
+--------------------*/
+
 Session::Session() : _recvBuffer(BUFFER_SIZE)
 {
 	_socket = SocketUtils::CreateSocket();
@@ -16,9 +20,15 @@ Session::~Session()
 
 void Session::Send(SendBufferRef buffer)
 {
-	WRITE_LOCK;
+	if (IsConnected() == false)
+	{
+		return;
+	}
 
-	_sendQueue.push(buffer);
+	{
+		WRITE_LOCK;
+		_sendQueue.push(buffer);
+	}
 
 	if (_sendRegistered.exchange(true) == false)
 	{
@@ -41,10 +51,6 @@ void Session::Disconnect(const WCHAR* cause)
 	// TEMP
 	wcout << "Disconnect: " << cause << endl;
 
-	// 컨텐츠 코드에서 오버라이딩
-	OnDisconnected();
-
-	GetService()->ReleaseSession(GetSessionRef());
 	RegisterDisconnect();
 }
 
@@ -232,6 +238,11 @@ void Session::ProcessConnect()
 void Session::ProcessDisconnect()
 {
 	_disconnectEvent.owner = nullptr;
+
+	// 컨텐츠 코드에서 오버라이딩
+	OnDisconnected();
+
+	GetService()->ReleaseSession(GetSessionRef());
 }
 
 void Session::ProcessRecv(int32 numOfBytes)
@@ -304,4 +315,44 @@ void Session::HandleError(int32 errorCode)
 		cout << "Handle Error: " << errorCode << endl;
 		break;
 	}
+}
+
+
+/*--------------------------
+		PacketSession
+--------------------------*/
+
+PacketSession::PacketSession()
+{
+}
+
+PacketSession::~PacketSession()
+{
+}
+
+int32 PacketSession::OnRecv(BYTE* buffer, int32 len)
+{
+	int32 processLen = 0;
+
+	while (true)
+	{
+		int dataSize = len - processLen;
+		if (dataSize < sizeof(PacketHeader))
+		{
+			break;
+		}
+
+		PacketHeader header = *(reinterpret_cast<PacketHeader*>(&buffer[processLen]));
+		
+		if (dataSize < header.size)
+		{
+			break;
+		}
+
+		OnRecvPacket(&buffer[processLen], header.size);
+
+		processLen += header.size;
+	}
+
+	return processLen;
 }
