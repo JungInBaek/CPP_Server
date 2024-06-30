@@ -5,6 +5,7 @@
 #include "GameSession.h"
 #include "GameSessionManager.h"
 #include "BufferWriter.h"
+#include "ServerPacketHandler.h"
 
 
 int main()
@@ -13,7 +14,7 @@ int main()
 
 	ASSERT_CRASH(service->Start());
 
-	for (int i = 0; i < 5; i++)
+	for (int32 i = 0; i < 5; i++)
 	{
 		GThreadManager->Launch(
 			[=]()
@@ -30,17 +31,8 @@ int main()
 
 	while (true)
 	{
-		SendBufferRef sendBuffer = GSendBufferManager->Open(4096);
-		BufferWriter bw(sendBuffer->Buffer(), sendBuffer->AllocSize());
-		PacketHeader* header = bw.Reserve<PacketHeader>();
-
-		bw << (uint64)1001 << (uint32)100 << (uint16)10;
-		bw.Write(sendData, sizeof(sendData));
-
-		header->size = bw.WriteSize();
-		header->id = 1;
-
-		sendBuffer->Close(bw.WriteSize());
+		Vector<BuffData> buffs{ BuffData{ 100, 1.5f }, BuffData{ 200, 2.3f }, BuffData{ 300, 0.7f } };
+		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_TEST(1001, 100, 10, buffs);
 
 		GSessionManager.Broadcast(sendBuffer);
 
