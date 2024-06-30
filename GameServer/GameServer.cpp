@@ -4,6 +4,7 @@
 #include "Service.h"
 #include "GameSession.h"
 #include "GameSessionManager.h"
+#include "BufferWriter.h"
 
 
 int main()
@@ -30,13 +31,16 @@ int main()
 	while (true)
 	{
 		SendBufferRef sendBuffer = GSendBufferManager->Open(4096);
+		BufferWriter bw(sendBuffer->Buffer(), sendBuffer->AllocSize());
+		PacketHeader* header = bw.Reserve<PacketHeader>();
 
-		BYTE* buffer = sendBuffer->Buffer();
-		reinterpret_cast<PacketHeader*>(buffer)->size = sizeof(PacketHeader) + sizeof(sendData);
-		reinterpret_cast<PacketHeader*>(buffer)->id = 1;
+		bw << (uint64)1001 << (uint32)100 << (uint16)10;
+		bw.Write(sendData, sizeof(sendData));
 
-		::memcpy(&buffer[4], sendData, sizeof(sendData));
-		sendBuffer->Close(sizeof(PacketHeader) + sizeof(sendData));
+		header->size = bw.WriteSize();
+		header->id = 1;
+
+		sendBuffer->Close(bw.WriteSize());
 
 		GSessionManager.Broadcast(sendBuffer);
 
