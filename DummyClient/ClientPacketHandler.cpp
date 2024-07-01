@@ -36,6 +36,8 @@ struct S_TEST
 	// 2) 바이트 배열 (ex. image)
 	// 3) 일반 리스트
 	vector<BuffData> buffs;
+
+	wstring name;
 };
 
 void ClientPacketHandler::Handle_S_TEST(BYTE* buffer, int32 len)
@@ -76,4 +78,15 @@ void ClientPacketHandler::Handle_S_TEST(BYTE* buffer, int32 len)
 
 		cout << endl;
 	}
+
+	// 문자열 데이터
+	uint16 nameSize;
+	br >> nameSize;
+	cout << "NAME SIZE: " << nameSize << endl;
+
+	wstring name;
+	name.resize(nameSize);
+	br.Read((void*)name.data(), nameSize * sizeof(WCHAR));
+	wcout.imbue(std::locale("kor"));
+	wcout << L"NAME: " << name << endl;
 }

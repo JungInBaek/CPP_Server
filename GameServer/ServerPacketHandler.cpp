@@ -18,7 +18,7 @@ void ServerPacketHandler::HandlePacket(BYTE* buffer, int32 len)
 	}
 }
 
-SendBufferRef ServerPacketHandler::Make_S_TEST(uint64 id, uint32 hp, uint16 att, Vector<BuffData> buffs)
+SendBufferRef ServerPacketHandler::Make_S_TEST(uint64 id, uint32 hp, uint16 att, Vector<BuffData> buffs, wstring name)
 {
 	SendBufferRef sendBuffer = GSendBufferManager->Open(4096);
 
@@ -33,6 +33,10 @@ SendBufferRef ServerPacketHandler::Make_S_TEST(uint64 id, uint32 hp, uint16 att,
 	{
 		bw << buff.buffId << buff.remainTime;
 	}*/
+
+	// 문자열 데이터, WCHAR = UTF-16
+	bw << (uint16)name.size();
+	bw.Write(name.data(), (uint32)name.size() * sizeof(WCHAR));
 
 	header->size = bw.WriteSize();
 	header->id = S_TEST;
