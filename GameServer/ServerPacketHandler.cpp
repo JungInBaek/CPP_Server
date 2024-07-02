@@ -26,22 +26,23 @@ SendBufferRef ServerPacketHandler::Make_S_TEST(uint64 id, uint32 hp, uint16 att,
 	PacketHeader* header = bw.Reserve<PacketHeader>();
 	bw << id << hp << att;
 
-	// 가변 데이터
-	bw << (uint16)buffs.size();
-	bw.Write(buffs.data(), (uint32)buffs.size() * sizeof(BuffData));
-	/*for (BuffData& buff : buffs)
-	{
-		bw << buff.buffId << buff.remainTime;
-	}*/
 
-	// 문자열 데이터, WCHAR = UTF-16
-	bw << (uint16)name.size();
-	bw.Write(name.data(), (uint32)name.size() * sizeof(WCHAR));
+	struct ListHeader
+	{
+		uint16 offset;
+		uint16 count;
+	};
+
+	// 가변 데이터
+	ListHeader* buffsHeader = bw.Reserve<ListHeader>();
+	buffsHeader->offset = (uint16) bw.WriteSize();
+	buffsHeader->count = (uint16) buffs.size();
+	bw.Write(buffs.data(), (uint32) buffs.size() * sizeof(BuffData));
+
 
 	header->size = bw.WriteSize();
 	header->id = S_TEST;
 
 	sendBuffer->Close(bw.WriteSize());
-
 	return sendBuffer;
 }

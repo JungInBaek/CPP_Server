@@ -6,11 +6,13 @@ enum
 	S_TEST = 1,
 };
 
+#pragma pack(1)
 struct BuffData
 {
 	uint64 buffId;
 	float remainTime;
 };
+#pragma pack()
 
 
 class ServerPacketHandler
