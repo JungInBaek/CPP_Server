@@ -42,8 +42,12 @@ struct PKT_S_TEST
 		uint32 size = 0;
 		
 		size += sizeof(PKT_S_TEST);
-		size += buffsCount * sizeof(BuffListItem);
+		if (packetSize < size)
+		{
+			return false;
+		}
 
+		size += buffsCount * sizeof(BuffListItem);
 		if (size != packetSize)
 		{
 			return false;
@@ -55,6 +59,15 @@ struct PKT_S_TEST
 		}
 
 		return true;
+	}
+
+	using BuffsList = PacketList<BuffListItem>;
+
+	BuffsList GetBuffsList()
+	{
+		BYTE* data = reinterpret_cast<BYTE*>(this);
+		data += buffsOffset;
+		return BuffsList(reinterpret_cast<BuffListItem*>(data), buffsCount);
 	}
 
 	// 가변 데이터
@@ -71,41 +84,32 @@ void ClientPacketHandler::Handle_S_TEST(BYTE* buffer, int32 len)
 {
 	BufferReader br(buffer, len);
 
-	if (len < sizeof(PKT_S_TEST))
+	PKT_S_TEST* pkt = reinterpret_cast<PKT_S_TEST*>(buffer);
+
+	if (pkt->Validate() == false)
 	{
 		return;
 	}
 
-	PKT_S_TEST pkt;
-	br >> pkt;
+	cout << "ID: " << pkt->id << ", HP: " << pkt->hp << ", ATT: " << pkt->att << endl;
 
-	if (pkt.Validate() == false)
-	{
-		return;
-	}
-
-	cout << "ID: " << pkt.id << ", HP: " << pkt.hp << ", ATT: " << pkt.att << endl;
 
 	// 가변 데이터
-	Vector<PKT_S_TEST::BuffListItem> buffs(pkt.buffsCount);
-	cout << "SIZE: " << pkt.buffsCount << endl;
+	PKT_S_TEST::BuffsList buffs = pkt->GetBuffsList();
+	cout << "BUFF_COUNT: " << buffs.Count() << endl;
 
-	for (uint32 i = 0; i < pkt.buffsCount; i++)
+	for (uint32 i = 0; i < buffs.Count(); i++)
 	{
-		br >> buffs[i];
+		cout << "BUFF_INFO: { " << buffs[i].buffId << ", " << buffs[i].remainTime << " }" << endl;
 	}
 
-	cout << "BUFFS:";
-	for (uint32 i = 0; i < pkt.buffsCount; i++)
+	for (auto it = buffs.begin(); it != buffs.end(); ++it)
 	{
-		cout << " { " << buffs[i].buffId << ", " << buffs[i].remainTime << " }";
+		cout << "BUFF_INFO: { " << it->buffId << ", " << it->remainTime << " }" << endl;
+	}
 
-		if (i != pkt.buffsCount - 1)
-		{
-			cout << ", ";
-			continue;
-		}
-
-		cout << endl;
+	for (auto& buff : buffs)
+	{
+		cout << "BUFF_INFO: { " << buff.buffId << ", " << buff.remainTime << " }" << endl;
 	}
 }
