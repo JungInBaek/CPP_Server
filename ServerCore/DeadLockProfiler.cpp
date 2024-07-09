@@ -10,7 +10,7 @@ void DeadLockProfiler::PushLock(const char* name)
 {
 	LockGuard guard(_lock);
 
-	// ¾ÆÀÌµğ¸¦ Ã£°Å³ª ¹ß±Ş
+	// ì•„ì´ë””ë¥¼ ì°¾ê±°ë‚˜ ë°œê¸‰
 	int32 lockId = 0;
 
 	auto findIt = _nameToId.find(name);
@@ -25,16 +25,16 @@ void DeadLockProfiler::PushLock(const char* name)
 		lockId = findIt->second;
 	}
 
-	// ÀÌÀü¿¡ ÀâÀº ¶ôÀÌ ÀÖ´ÂÁö È®ÀÎ
+	// ì´ì „ì— ì¡ì€ ë½ì´ ìˆëŠ”ì§€ í™•ì¸
 	if (LLockStack.empty()  == false)
 	{
 		const int32 prevId = LLockStack.top();
-		// ¼­·Î ´Ù¸¥ ¶ôÀ» ÀâÀ¸·Á ÇÑ´Ù¸é
+		// ì„œë¡œ ë‹¤ë¥¸ ë½ì„ ì¡ìœ¼ë ¤ í•œë‹¤ë©´
 		if (lockId != prevId)
 		{
 			set<int32>& history = _lockHistory[prevId];
 			
-			// ±âÁ¸¿¡ ¹æ¹®ÇÏÁö ¾ÊÀº ÄÉÀÌ½º¶ó¸é µ¥µå¶ô ¿©ºÎ¸¦ ´Ù½Ã È®ÀÎ
+			// ê¸°ì¡´ì— ë°©ë¬¸í•˜ì§€ ì•Šì€ ì¼€ì´ìŠ¤ë¼ë©´ ë°ë“œë½ ì—¬ë¶€ë¥¼ ë‹¤ì‹œ í™•ì¸
 			if (history.find(lockId) == history.end())
 			{
 				history.insert(lockId);
@@ -76,7 +76,7 @@ void DeadLockProfiler::CheckCycle()
 		Dfs(lockId);
 	}
 
-	// ¿¬»êÀÌ ³¡³µÀ¸¸é Á¤¸®
+	// ì—°ì‚°ì´ ëë‚¬ìœ¼ë©´ ì •ë¦¬
 	_discorveredOrder.clear();
 	_finished.clear();
 	_parent.clear();
@@ -90,7 +90,7 @@ void DeadLockProfiler::Dfs(int32 here)
 	}
 	_discorveredOrder[here] = _discorveredCount++;
 
-	// ÀÎÁ¢ÇÑ ¸ğµç Á¤Á¡
+	// ì¸ì ‘í•œ ëª¨ë“  ì •ì 
 	auto findIt = _lockHistory.find(here);
 
 	if (findIt == _lockHistory.end())
@@ -99,11 +99,11 @@ void DeadLockProfiler::Dfs(int32 here)
 		return;
 	}
 
-	// ÀÎÁ¢ÇÑ ¸ğµç Á¤Á¡ ¼øÈ¸
+	// ë°©ë¬¸í•œ ì ì´ ì—†ë‹¤ë©´ ë°©ë¬¸
 	set<int32>& nextSet = findIt->second;
 	for (int32 there : nextSet)
 	{
-		// ¹æ¹®ÇÑ ÀûÀÌ ¾ø´Ù¸é ¹æ¹®
+		// ï¿½æ¹®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½ ï¿½æ¹®
 		if (_discorveredOrder[there] == -1)
 		{
 			_parent[there] = here;
@@ -111,13 +111,13 @@ void DeadLockProfiler::Dfs(int32 here)
 			continue;
 		}
 
-		// here°¡ thereº¸´Ù ¸ÕÀú ¹ß°ßµÇ¾ú´Ù¸é ¼ø¹æÇâ °£¼±
+		// hereê°€ thereë³´ë‹¤ ë¨¼ì € ë°œê²¬ë˜ì—ˆë‹¤ë©´ ìˆœë°©í–¥ ê°„ì„ 
 		if (_discorveredOrder[here] < _discorveredOrder[there])
 		{
 			continue;
 		}
 
-		// ¼ø¹æÇâÀÌ ¾Æ´Ï°í, Dfs(there)°¡ ¾ÆÁ÷ Á¾·áµÇÁö ¾Ê¾Ò´Ù¸é ¿ª¹æÇâ °£¼±
+		// ìˆœë°©í–¥ì´ ì•„ë‹ˆê³ , Dfs(there)ê°€ ì•„ì§ ì¢…ë£Œë˜ì§€ ì•Šì•˜ë‹¤ë©´ ì—­ë°©í–¥ ê°„ì„ 
 		if (_finished[there] == false)
 		{
 			printf("%s -> %s\n", _idToName[here], _idToName[there]);

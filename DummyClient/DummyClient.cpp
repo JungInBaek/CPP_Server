@@ -19,6 +19,10 @@ public:
 	virtual void OnConnected() override
 	{
 		//cout << "Connected to Server" << endl;
+
+		Protocol::C_LOGIN pkt;
+		SendBufferRef sendBuffer = ServerPacketHandler::MakeSendBuffer(pkt);
+		Send(sendBuffer);
 	}
 
 	virtual void OnRecvPacket(BYTE* buffer, int32 len) override
@@ -47,7 +51,7 @@ int main()
 
 	this_thread::sleep_for(1s);
 
-	ClientServiceRef service = MakeShared<ClientService>(NetAddress(L"127.0.0.1", 7777), MakeShared<IocpCore>(), MakeShared<ServerSession>, 1);
+	ClientServiceRef service = MakeShared<ClientService>(NetAddress(L"127.0.0.1", 7777), MakeShared<IocpCore>(), MakeShared<ServerSession>, 100);
 
 	ASSERT_CRASH(service->Start());
 
@@ -62,6 +66,16 @@ int main()
 				}
 			}
 		);
+	}
+
+	Protocol::C_CHAT chatPkt;
+	chatPkt.set_msg(u8"Hello World ! ");
+	SendBufferRef sendBuffer = ServerPacketHandler::MakeSendBuffer(chatPkt);
+
+	while (true)
+	{
+		service->Broadcast(sendBuffer);
+		this_thread::sleep_for(1s);
 	}
 
 	GThreadManager->Join();

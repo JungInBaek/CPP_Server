@@ -48,17 +48,24 @@ public:
 		Set(ptr);
 	}
 
-	// º¹»ç
+	// ë³µì‚¬
 	TSharedPtr(const TSharedPtr& rhs)
 	{
 		Set(rhs._ptr);
 	}
 
-	// ÀÌµ¿
+	// ì´ë™
 	TSharedPtr(TSharedPtr&& rhs)
 	{
 		_ptr = rhs._ptr;
 		rhs._ptr = nullptr;
+	}
+
+	// ìƒì† ê´€ê³„ ë³µì‚¬
+	template<typename U>
+	TSharedPtr(const TSharedPtr<U>& rhs)
+	{
+		Set(static_cast<T*>(rhs._ptr));
 	}
 
 	~TSharedPtr()
@@ -67,7 +74,7 @@ public:
 	}
 
 public:
-	// º¹»ç
+	// ë³µì‚¬ ì—°ì‚°ì
 	TSharedPtr& operator=(const TSharedPtr& rhs)
 	{
 		if (_ptr != rhs._ptr)
@@ -78,7 +85,7 @@ public:
 		return *this;
 	}
 
-	// ÀÌµ¿
+	// ì´ë™ ì—°ì‚°ì
 	TSharedPtr& operator=(TSharedPtr&& rhs)
 	{
 		Release();

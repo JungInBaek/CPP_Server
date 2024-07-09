@@ -17,14 +17,14 @@ void RecvBuffer::Clean()
 	int32 dataSize = DataSize();
 	if (dataSize == 0)
 	{
-		// read, write Ä¿¼­°¡ °°Àº À§Ä¡¶ó¸é
+		// read, write ì»¤ì„œê°€ ê°™ì€ ìœ„ì¹˜ë¼ë©´
 		_readPos = _writePos = 0;
 		return;
 	}
 
 	if (FreeSize() < _bufferSize)
 	{
-		// ¿©À¯ °ø°£ÀÌ ¹öÆÛ 1°³ Å©±â ¹Ì¸¸ÀÌ¶ó¸é
+		// ì—¬ìœ  ê³µê°„ì´ ë²„í¼ 1ê°œ í¬ê¸° ë¯¸ë§Œì´ë¼ë©´
 		::memcpy(&_buffer[0], &_buffer[_readPos], dataSize);
 
 		_readPos = 0;

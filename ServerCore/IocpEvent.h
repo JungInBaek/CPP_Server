@@ -13,7 +13,7 @@ enum class EventType : uint8
 	Send,
 };
 
-// °¡»óÇÔ¼ö »ç¿ë ÁÖÀÇ: 0¹ø offsetÀÌ OVERLAPPED¿©¾ß ÇÏ´Âµ¥ °¡»óÇÔ¼ö Å×ÀÌºíÀÌ Ã¤¿öÁü, »ó¼ÓÀÏ °æ¿ì 0¹ø offsetÀº OVERLAPPED À¯ÁöµÊ
+// ê°€ìƒí•¨ìˆ˜ ì‚¬ìš© ì£¼ì˜: 0ë²ˆ offsetì´ OVERLAPPEDì—¬ì•¼ í•˜ëŠ”ë° ê°€ìƒí•¨ìˆ˜ í…Œì´ë¸”ì´ ì±„ì›Œì§. ë‹¨, ìƒì†ì¼ ê²½ìš° 0ë²ˆ offsetì€ OVERLAPPEDë¡œ ìœ ì§€ë¨
 /*----------------------
 		IocpEvent
 ----------------------*/

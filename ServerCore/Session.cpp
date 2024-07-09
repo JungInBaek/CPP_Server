@@ -184,7 +184,7 @@ void Session::RegisterSend()
 			SendBufferRef sendBuffer = _sendQueue.front();
 
 			writeSize += sendBuffer->WriteSize();
-			// TODO: ¿¹¿ÜÃ¼Å©
+			// TODO: ì˜ˆì™¸ì²´í¬
 
 			_sendQueue.pop();
 			_sendEvent.sendBuffers.push_back(sendBuffer);
@@ -225,13 +225,13 @@ void Session::ProcessConnect()
 
 	_connected.store(true);
 
-	// ¼¼¼Ç µî·Ï
+	// ì„¸ì…˜ ë“±ë¡
 	GetService()->AddSession(GetSessionRef());
 
-	// ÄÁÅÙÃ÷ ÄÚµå¿¡¼­ ¿À¹ö¶óÀÌµù
+	// ì»¨í…ì¸  ì½”ë“œì—ì„œ ì˜¤ë²„ë¼ì´ë”©
 	OnConnected();
 
-	// ¼ö½Å µî·Ï
+	// ìˆ˜ì‹  ë“±ë¡
 	RegisterRecv();
 }
 
@@ -239,7 +239,7 @@ void Session::ProcessDisconnect()
 {
 	_disconnectEvent.owner = nullptr;
 
-	// ÄÁÅÙÃ÷ ÄÚµå¿¡¼­ ¿À¹ö¶óÀÌµù
+	// ì»¨í…ì¸  ì½”ë“œì—ì„œ ì˜¤ë²„ë¼ì´ë”©
 	OnDisconnected();
 
 	GetService()->ReleaseSession(GetSessionRef());
@@ -262,7 +262,7 @@ void Session::ProcessRecv(int32 numOfBytes)
 	}
 
 	int32 dataSize = _recvBuffer.DataSize();
-	int32 processLen = OnRecv(_recvBuffer.ReadPos(), dataSize); // ÄÁÅÙÃ÷ ÄÚµå¿¡¼­ ¿À¹ö¶óÀÌµù
+	int32 processLen = OnRecv(_recvBuffer.ReadPos(), dataSize); // ì»¨í…ì¸  ì½”ë“œì—ì„œ ì˜¤ë²„ë¼ì´ë”©
 
 	if (processLen < 0 || dataSize < processLen || _recvBuffer.OnRead(processLen) == false)
 	{
@@ -270,10 +270,10 @@ void Session::ProcessRecv(int32 numOfBytes)
 		return;
 	}
 
-	// Ä¿¼­ Á¤¸®
+	// ì»¤ì„œ ì •ë¦¬
 	_recvBuffer.Clean();
 
-	// ¼ö½Å µî·Ï
+	// ìˆ˜ì‹  ë“±ë¡
 	RegisterRecv();
 }
 
@@ -288,7 +288,7 @@ void Session::ProcessSend(int32 numOfBytes)
 		return;
 	}
 
-	// ÄÁÅÙÃ÷ ÄÚµå¿¡¼­ ¿À¹ö¶óÀÌµù
+	// ì»¨í…ì¸  ì½”ë“œì—ì„œ ì˜¤ë²„ë¼ì´ë”©
 	OnSend(numOfBytes);
 
 	WRITE_LOCK;

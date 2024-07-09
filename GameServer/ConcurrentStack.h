@@ -131,10 +131,10 @@ public:
 		CountedNodePtr oldHead = _head;
 		while (true)
 		{
-			// ÂüÁ¶±Ç È¹µæ (externalCount¸¦ Çö ½ÃÁ¡ ±âÁØ +1)
+			// ì°¸ì¡°ê¶Œ íšë“ (externalCountë¥¼ í˜„ ì‹œì  ê¸°ì¤€ +1)
 			IncreaseHeadCount(oldHead);
 
-			// ÃÖ¼Ò externalCount >= 2 ÀÌ¹Ç·Î »èÁ¦x
+			// ìµœì†Œ externalCount >= 2 ì´ë¯€ë¡œ ì‚­ì œx
 			Node* ptr = oldHead.ptr;
 
 			if (ptr == nullptr)
@@ -142,7 +142,7 @@ public:
 				return shared_ptr<T>();
 			}
 
-			// ¼ÒÀ¯±Ç È¹µæ (ptr->next·Î head¸¦ ¹Ù²ãÄ¡±â)
+			// ì†Œìœ ê¶Œ íšë“ (ptr->nextë¡œ headë¥¼ ë°”ê¿”ì¹˜ê¸°)
 			if (_head.compare_exchange_strong(oldHead, ptr->next))
 			{
 				shared_ptr<T> res;
