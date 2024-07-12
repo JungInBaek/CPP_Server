@@ -7,10 +7,21 @@
 #include "BufferWriter.h"
 #include "ClientPacketHandler.h"
 #include "Protocol.pb.h"
+#include "Room.h"
 
 
 int main()
 {
+	// TEST JOB
+	{
+		HealJob healJob;
+		healJob._target = 1;
+		healJob._healValue = 10;
+
+		healJob.Execute();
+	}
+	// JOB
+
 	ClientPacketHandler::Init();
 
 	ServerServiceRef service = MakeShared<ServerService>(NetAddress(L"127.0.0.1", 7777), MakeShared<IocpCore>(), MakeShared<GameSession>, 100);
@@ -28,6 +39,12 @@ int main()
 				}
 			}
 		);
+	}
+
+	while (true)
+	{
+		GRoom.FlushJob();
+		this_thread::sleep_for(1ms);
 	}
 
 	GThreadManager->Join();
