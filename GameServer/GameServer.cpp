@@ -10,15 +10,33 @@
 #include "Room.h"
 
 
+void HealByValue(uint64 target, uint32 healValue)
+{
+	cout << target << "에게 " << healValue << "만큼 힐" << endl;
+}
+
+class Knight
+{
+public:
+	void HealMe(uint32 value)
+	{
+		cout << "HealMe! " << value << endl;
+	}
+};
+
+
 int main()
 {
 	// TEST JOB
 	{
-		HealJob healJob;
-		healJob._target = 1;
-		healJob._healValue = 10;
+		FuncJob<void, uint64, uint32> job(HealByValue, 100, 10);
 
-		healJob.Execute();
+		job.Execute();
+	}
+	{
+		Knight k1;
+		MemberJob<Knight, void, uint32> job(&k1, &Knight::HealMe, 10);
+		job.Execute();
 	}
 	// JOB
 
