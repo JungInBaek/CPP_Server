@@ -1,10 +1,8 @@
 #pragma once
-#include "Job.h"
-
-extern class Room GRoom;
+#include "JobSerializer.h"
 
 
-class Room
+class Room : public JobSerializer
 {
 public:
 	void Enter(PlayerRef player);
@@ -12,16 +10,10 @@ public:
 	void Broadcast(SendBufferRef sendBuffer);
 
 public:
-	template<typename T, typename Ret, typename... Args>
-	void PushJob(Ret(T::*memFunc)(Args...), Args... args)
-	{
-		auto job = MakeShared<MemberJob<T, Ret, Args...>>(static_cast<T*>(this), memFunc, args...);
-		_jobs.Push(job);
-	}
-
-	void FlushJob();
+	virtual void FlushJob() override;
 
 private:
 	map<uint64, PlayerRef> _players;
-	JobQueue _jobs;
 };
+
+extern shared_ptr<Room> GRoom;

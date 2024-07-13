@@ -1,24 +1,12 @@
 #pragma once
-
 #include "Types.h"
 #include "MemoryPool.h"
-#include "Allocator.h"
 
 
 template<typename Type>
 class ObjectPool
 {
 public:
-	static void Push(Type* obj)
-	{
-		obj->~Type();
-#ifdef _STOMP
-		StompAllocator::Release(MemoryHeader::DetachHeader(obj));
-#else
-		s_pool.Push(MemoryHeader::DetachHeader(obj));
-#endif
-	}
-
 	template<typename... Args>
 	static Type* Pop(Args&&... args)
 	{
@@ -30,6 +18,16 @@ public:
 #endif
 		new(memory)Type(forward<Args>(args)...);
 		return memory;
+	}
+
+	static void Push(Type* obj)
+	{
+		obj->~Type();
+#ifdef _STOMP
+		StompAllocator::Release(MemoryHeader::DetachHeader(obj));
+#else
+		s_pool.Push(MemoryHeader::DetachHeader(obj));
+#endif
 	}
 
 	template<typename... Args>
