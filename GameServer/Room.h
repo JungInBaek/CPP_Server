@@ -1,16 +1,13 @@
 #pragma once
-#include "JobSerializer.h"
+#include "JobQueue.h"
 
 
-class Room : public JobSerializer
+class Room : public JobQueue
 {
 public:
 	void Enter(PlayerRef player);
 	void Leave(PlayerRef player);
 	void Broadcast(SendBufferRef sendBuffer);
-
-public:
-	virtual void FlushJob() override;
 
 private:
 	map<uint64, PlayerRef> _players;
