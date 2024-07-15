@@ -79,6 +79,4 @@ int main()
 	}
 
 	GThreadManager->Join();
-
-	::WSACleanup();
 }
