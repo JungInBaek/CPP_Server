@@ -76,13 +76,14 @@ bool Handle_C_ENTER_GAME(PacketSessionRef& session, Protocol::C_ENTER_GAME& pkt)
 
 	// TODO: Validation
 
-	PlayerRef player = gameSession->_players[index];
-	GRoom->DoAsync(&Room::Enter, player);
+	gameSession->_currentPlayer = gameSession->_players[index];
+	gameSession->_room = GRoom;
+	GRoom->DoAsync(&Room::Enter, gameSession->_currentPlayer);
 
 	Protocol::S_ENTER_GAME enterGamePkt;
 	enterGamePkt.set_success(true);
 	SendBufferRef sendBuffer = ClientPacketHandler::MakeSendBuffer(enterGamePkt);
-	player->ownerSession->Send(sendBuffer);
+	gameSession->_currentPlayer->ownerSession->Send(sendBuffer);
 
 	return true;
 }
