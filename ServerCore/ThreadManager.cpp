@@ -74,3 +74,10 @@ void ThreadManager::DoGlobalQueueWork()
 		jobQueue->Execute();
 	}
 }
+
+void ThreadManager::DistributeReservedJobs()
+{
+	uint64 now = ::GetTickCount64();
+
+	GJobTimer->Distribute(now);
+}

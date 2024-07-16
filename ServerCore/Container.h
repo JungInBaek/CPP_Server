@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Types.h"
 #include "Allocator.h"
 
 using namespace std;
