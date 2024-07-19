@@ -47,7 +47,9 @@ int main()
 			CREATE TABLE [dbo].[Gold]						\
 			(												\
 				[id] INT NOT NULL PRIMARY KEY IDENTITY,		\
-				[gold] INT NULL								\
+				[gold] INT NULL,							\
+				[name] NVARCHAR(50) NULL,					\
+				[createDate] DATETIME NULL					\
 			);";
 		ASSERT_CRASH(connection->Execute(query));
 
@@ -66,11 +68,22 @@ int main()
 		int32 gold = 100;
 		SQLLEN len = 0;
 
+		WCHAR name[100] = L"홍길동";
+		SQLLEN nameLen = 0;
+
+		TIMESTAMP_STRUCT createDate = {};
+		createDate.year = 2024;
+		createDate.month = 7;
+		createDate.day = 19;
+		SQLLEN createDateLen = 0;
+
 		// 정보 바인딩
-		ASSERT_CRASH(connection->BindParam(1, SQL_C_LONG, SQL_INTEGER, sizeof(gold), &gold, &len));
+		ASSERT_CRASH(connection->BindParam(1,&gold, &len));
+		ASSERT_CRASH(connection->BindParam(2,name, &nameLen));
+		ASSERT_CRASH(connection->BindParam(3,&createDate, &createDateLen));
 
 		// SQL 실행
-		auto query = L"INSERT INTO [dbo].[Gold] (gold) VALUES (?);";
+		auto query = L"INSERT INTO [dbo].[Gold] ([gold], [name], [createDate]) VALUES (?, ?, ?);";
 		ASSERT_CRASH(connection->Execute(query));
 
 		GDBConnectionPool->Push(connection);
@@ -88,23 +101,34 @@ int main()
 		SQLLEN len = 0;
 
 		// 정보 바인딩
-		ASSERT_CRASH(connection->BindParam(1, SQL_C_LONG, SQL_INTEGER, sizeof(gold), &gold, &len));
+		ASSERT_CRASH(connection->BindParam(1, &gold, &len));
 
 		int32 outId = 0;
 		SQLLEN outIdLen = 0;
-		ASSERT_CRASH(connection->BindCol(1, SQL_C_LONG, OUT &outId, sizeof(outId), &outIdLen));
+		ASSERT_CRASH(connection->BindCol(1, &outId, &outIdLen));
 
 		int32 outGold = 0;
 		SQLLEN outGoldLen = 0;
-		ASSERT_CRASH(connection->BindCol(2, SQL_C_LONG, OUT &outGold, sizeof(outGold), &outGoldLen));
+		ASSERT_CRASH(connection->BindCol(2, &outGold, &outGoldLen));
+
+		WCHAR outName[100];
+		SQLLEN outNameLen = 0;
+		ASSERT_CRASH(connection->BindCol(3, outName, len32(outName), &outNameLen));
+
+		TIMESTAMP_STRUCT outCreateDate;
+		SQLLEN outCreateDateLen = 0;
+		ASSERT_CRASH(connection->BindCol(4, &outCreateDate, &outCreateDateLen));
 
 		// SQL 실행
-		auto query = L"SELECT id, gold FROM [dbo].[Gold] WHERE gold = (?);";
+		auto query = L"SELECT * FROM [dbo].[Gold] WHERE gold = (?);";
 		ASSERT_CRASH(connection->Execute(query));
 
+		//std::locale::global(std::locale("kor"));
+		setlocale(LC_ALL, "");
 		while (connection->Fetch())
 		{
-			wcout << "Id: " << outId << ", Gold: " << outGold << endl;
+			wcout << "Id: " << outId << ", Gold: " << outGold << ", Name: " << outName << endl;
+			wcout << "Date: " << outCreateDate.year << "/" << outCreateDate.month << "/" << outCreateDate.day << endl;
 		}
 
 		GDBConnectionPool->Push(connection);
