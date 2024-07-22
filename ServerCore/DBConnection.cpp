@@ -282,7 +282,6 @@ void DBConnection::HandleError(SQLRETURN ret)
 			break;
 		}
 
-		// 조건식 ??
 		if (errorRet != SQL_SUCCESS && errorRet != SQL_SUCCESS_WITH_INFO)
 		{
 			break;

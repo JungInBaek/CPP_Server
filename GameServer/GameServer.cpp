@@ -9,6 +9,7 @@
 #include "Protocol.pb.h"
 #include "Room.h"
 #include "DBConnectionPool.h"
+#include "DBBind.h"
 
 
 enum
@@ -61,6 +62,20 @@ int main()
 	{
 		DBConnection* connection = GDBConnectionPool->Pop();
 
+		auto query = L"INSERT INTO [dbo].[Gold] ([gold], [name], [createDate]) VALUES (?, ?, ?);";
+		DBBind<3, 0> dbBind(*connection, query);
+
+		int32 gold = 100;
+		WCHAR name[100] = L"홍길동";
+		TIMESTAMP_STRUCT createDate = { 2024, 7, 19 };
+
+		dbBind.BindParam(0, gold);
+		dbBind.BindParam(1, name);
+		dbBind.BindParam(2, createDate);
+
+		ASSERT_CRASH(dbBind.Execute());
+
+		/*
 		// 기존 바인딩 된 정보 정리
 		connection->Unbind();
 
@@ -85,6 +100,7 @@ int main()
 		// SQL 실행
 		auto query = L"INSERT INTO [dbo].[Gold] ([gold], [name], [createDate]) VALUES (?, ?, ?);";
 		ASSERT_CRASH(connection->Execute(query));
+		*/
 
 		GDBConnectionPool->Push(connection);
 	}
@@ -93,6 +109,25 @@ int main()
 	{
 		DBConnection* connection = GDBConnectionPool->Pop();
 
+		auto query = L"SELECT id, gold, name, createDate FROM [dbo].[Gold] WHERE gold = (?);";
+		DBBind<1, 4> dbBind(*connection, query);
+
+		int32 gold = 100;
+		dbBind.BindParam(0, gold);
+
+		int32 outId = 0;
+		int32 outGold = 0;
+		WCHAR outName[100];
+		TIMESTAMP_STRUCT outCreateDate = {};
+
+		dbBind.BindCol(0, outId);
+		dbBind.BindCol(1, outGold);
+		dbBind.BindCol(2, outName);
+		dbBind.BindCol(3, outCreateDate);
+
+		ASSERT_CRASH(dbBind.Execute());
+
+		/*
 		// 기존 바인딩 된 정보 정리
 		connection->Unbind();
 
@@ -122,6 +157,7 @@ int main()
 		// SQL 실행
 		auto query = L"SELECT * FROM [dbo].[Gold] WHERE gold = (?);";
 		ASSERT_CRASH(connection->Execute(query));
+		*/
 
 		//std::locale::global(std::locale("kor"));
 		setlocale(LC_ALL, "");
