@@ -8,7 +8,7 @@
       <UniqueIdentifier>{c09ab851-a83e-4b6f-a842-09972f6621b0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Protocol">
-      <UniqueIdentifier>{e61da3b8-2379-44f5-89d9-8dba9a60d5a7}</UniqueIdentifier>
+      <UniqueIdentifier>{7c227f24-f51d-4ec3-b204-5b2c73766679}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -24,10 +24,10 @@
     <ClCompile Include="Protocol.pb.cc">
       <Filter>Protocol</Filter>
     </ClCompile>
-    <ClCompile Include="Enum.pb.cc">
+    <ClCompile Include="Struct.pb.cc">
       <Filter>Protocol</Filter>
     </ClCompile>
-    <ClCompile Include="Struct.pb.cc">
+    <ClCompile Include="Enum.pb.cc">
       <Filter>Protocol</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,25 +41,11 @@
     <ClInclude Include="Protocol.pb.h">
       <Filter>Protocol</Filter>
     </ClInclude>
-    <ClInclude Include="Enum.pb.h">
-      <Filter>Protocol</Filter>
-    </ClInclude>
     <ClInclude Include="Struct.pb.h">
       <Filter>Protocol</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Common\Protobuf\bin\Protocol.proto">
+    <ClInclude Include="Enum.pb.h">
       <Filter>Protocol</Filter>
-    </None>
-    <None Include="..\Common\Protobuf\bin\Struct.proto">
-      <Filter>Protocol</Filter>
-    </None>
-    <None Include="..\Common\Protobuf\bin\GenPackets.bat">
-      <Filter>Protocol</Filter>
-    </None>
-    <None Include="..\Common\Protobuf\bin\Enum.proto">
-      <Filter>Protocol</Filter>
-    </None>
+    </ClInclude>
   </ItemGroup>
 </Project>
